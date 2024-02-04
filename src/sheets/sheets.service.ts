@@ -2,8 +2,17 @@ import { Injectable } from "@nestjs/common";
 import { google } from "googleapis";
 
 interface ITableData {
-  dateFill?: string;
-  brand: string;
+  name?: any;
+  brand: any;
+  platformId: any;
+  article: any;
+  productsOrdered: any;
+  priceOrdered: any;
+  day: any;
+  week: any;
+  month: any;
+  turnover: any;
+  shopId: any;
 }
 
 @Injectable()
@@ -14,37 +23,7 @@ export class SheetsService {
   //     const keyMass: any = {values: 'Отчет'};
   //     const fun = (data) => {
   //         const reports = [];
-  //         for (let i = 0; i < data.data.values.length; i++) {
-  //             const item = data.data.values[i];
-  //             if (i === 0) continue;
-  //             const fields = {
-  //                 dateFill: item[0],
-  //                 brand: item[1],
-  //                 item: item[2],
-  //                 season: item[3],
-  //                 collection: item[4],
-  //                 name: item[5],
-  //                 article: item[6],
-  //                 number: item[7],
-  //                 barcode: item[8],
-  //                 size: item[9],
-  //                 contract: item[10],
-  //                 warehouse: item[11],
-  //                 incomes: item[12],
-  //                 orderedCount: item[13],
-  //                 orderedPrice: item[14],
-  //                 buyedCount: item[15],
-  //                 buyedPrice: item[16],
-  //                 remain: item[17],
-  //                 month: item[18],
-  //                 day: item[19],
-  //                 price: item[20],
-  //                 week: item[21],
-  //                 orderedSummary: item[22],
-  //                 turnover: item[23],
-  //             }
-  //             reports.push(fields);
-  //         }
+  //         
   //         console.log(reports);
   //   v      return JSON.stringify(reports);
   //     };
@@ -97,7 +76,52 @@ export class SheetsService {
   //     })();
   // }
 
-  async readDocument() {
+  async getData() {
+    const firstTableResponse = await this.readDocument(process.env.SHEET_ID_1, "Отчёт");
+    const secondTableResponse = await this.readDocument(process.env.SHEET_ID_2, "Отчет");
+    const combinedData = [];
+    for (let i = 0; i < firstTableResponse.length; i++) {
+      const item = firstTableResponse[i];
+      if (i === 0) continue;
+      if (item[0] === "" &&  item[1] === "") continue;
+      const fields: ITableData = {
+        name: item[0],
+        brand: item[1],
+        platformId: item[2],
+        article: item[3],
+        productsOrdered: item[5],
+        priceOrdered: item[9],
+        day: item[4],
+        week: item[21],
+        month: item[19],
+        turnover: item[22],
+        shopId: 1
+      }
+      combinedData.push(fields);
+    };
+    for (let i = 0; i < secondTableResponse.length; i++) {
+      const item = secondTableResponse[i];
+      if (i === 0) continue;
+      if (item[0] === "" &&  item[1] === "") continue;
+      const fields: ITableData = {
+        name: item[5],
+        brand: item[2],
+        platformId: item[8],
+        article: item[6],
+        productsOrdered: item[13],
+        priceOrdered: item[22],
+        day: item[19],
+        week: item[21],
+        month: item[18],
+        turnover: item[23],
+        shopId: 2
+      }
+      combinedData.push(fields);
+    };
+    return combinedData;
+  }
+
+  async readDocument(sheetId, list) {
     const keyFile = `${process.env.GOOGLE_FILE_PATH}`;
     const auth = new google.auth.GoogleAuth({
       keyFile,
@@ -105,12 +129,11 @@ export class SheetsService {
     });
     const sheets = google.sheets("v4");
     const sheetsInstance = sheets.spreadsheets.values;
-    const sheetId = `${process.env.SHEET_ID}`;
     try {
       const response = await sheetsInstance.get({
         auth,
         spreadsheetId: sheetId,
-        range: "Отчет", // Specify the range of cells you want to retrieve
+        range: list, // Specify the range of cells you want to retrieve
       });
 
       const values = response.data.values;

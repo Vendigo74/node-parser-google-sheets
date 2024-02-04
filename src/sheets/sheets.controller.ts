@@ -7,7 +7,7 @@ export class SheetsController {
 
   @Get()
   async getJSON() {
-    const data = await this.sheetsService.readDocument();
+    const data = await this.sheetsService.getData();
     console.log("data in controller is", data);
     return data;
   }
