@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { google } from "googleapis";
+import * as fs from 'fs';
 
 interface ITableData {
   name?: any;
@@ -118,8 +119,12 @@ export class SheetsService {
       }
       combinedData.push(fields);
     };
+    const jsonString = JSON.stringify(combinedData, null, 2);
+    fs.writeFileSync("config/static_data.json", jsonString, 'utf8');
     return combinedData;
   }
+  
+  
 
   async readDocument(sheetId, list) {
     const keyFile = `${process.env.GOOGLE_FILE_PATH}`;
