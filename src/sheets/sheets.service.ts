@@ -1,23 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { google } from "googleapis";
 import * as fs from "fs";
-
-interface ITableData {
-  name?: any;
-  brand: any;
-  platformId: any;
-  article: any;
-  productsOrdered: any;
-  priceOrdered: any;
-  day: any;
-  week: any;
-  month: any;
-  turnover: any;
-  shopId: any;
-}
+import { InjectConnection } from "nest-knexjs";
+import { ITableData } from "./types/sheet";
+import { Knex } from "knex";
 
 @Injectable()
 export class SheetsService {
+  constructor(@InjectConnection() private readonly knex: Knex) {}
+
   async getData() {
     const firstTableResponse = await this.parseDocumentData(
       process.env.SHEET_ID_1,
@@ -71,7 +62,35 @@ export class SheetsService {
     return combinedData;
   }
 
-  async parseDocumentData(sheetId, list) {
+  async getData2() {
+    const tableReadResult = await this.parseDocumentData(
+      process.env.SHEET_ID,
+      "123",
+    );
+    const items: ITableData[] = [];
+    for (let i = 0; i < tableReadResult.length; i++) {
+      const item = tableReadResult[i];
+      if (i === 0) continue;
+      if (item[0] === "" && item[1] === "") continue;
+      const fields: ITableData = {
+        name: item[0],
+        brand: item[1],
+        platformId: item[2],
+        article: item[3],
+        productsOrdered: item[5],
+        priceOrdered: item[9],
+        day: item[4],
+        week: item[21],
+        month: item[19],
+        turnover: item[22],
+        shopId: 1,
+      };
+      items.push(fields);
+    }
+    return items;
+  }
+
+  async parseDocumentData(sheetId: string, list: string) {
     const keyFile = `${process.env.GOOGLE_FILE_PATH}`;
     const auth = new google.auth.GoogleAuth({
       keyFile,
