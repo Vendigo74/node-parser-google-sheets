@@ -67,6 +67,7 @@ export class SheetsService {
       process.env.SHEET_ID,
       "123",
     );
+    console.log("table data result", tableReadResult);
     const items: ITableData[] = [];
     for (let i = 0; i < tableReadResult.length; i++) {
       const item = tableReadResult[i];
