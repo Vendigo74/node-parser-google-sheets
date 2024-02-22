@@ -76,9 +76,9 @@ export class SheetsService {
         productsOrdered: item[5],
         priceOrdered: item[9],
         day: item[4],
-        week: item[21],
+        week: item[22],
         month: item[19],
-        turnover: item[22],
+        turnover: item[25],
         shopId: 1,
       };
       items.push(fields);
