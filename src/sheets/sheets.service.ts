@@ -1,14 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { google } from "googleapis";
 import * as fs from "fs";
-import { InjectConnection } from "nest-knexjs";
 import { ITableData } from "./types/sheet";
-import { Knex } from "knex";
 
 @Injectable()
 export class SheetsService {
-  constructor(@InjectConnection() private readonly knex: Knex) {}
-
   async getData() {
     const firstTableResponse = await this.parseDocumentData(
       process.env.SHEET_ID_1,
@@ -67,7 +63,6 @@ export class SheetsService {
       process.env.SHEET_ID,
       "123",
     );
-    console.log("table data result", tableReadResult);
     const items: ITableData[] = [];
     for (let i = 0; i < tableReadResult.length; i++) {
       const item = tableReadResult[i];
@@ -88,7 +83,17 @@ export class SheetsService {
       };
       items.push(fields);
     }
-    return items;
+    const prepared = [...items].map((row) => {
+      const priceOrdered = row.priceOrdered ? row.priceOrdered : 0;
+      const productsOrdered = row.productsOrdered ? row.productsOrdered : 0;
+
+      return {
+        ...row,
+        priceOrdered,
+        productsOrdered,
+      };
+    });
+    return prepared;
   }
 
   async parseDocumentData(sheetId: string, list: string) {

@@ -6,6 +6,7 @@ import { ConfigModule } from "@nestjs/config";
 import { StatisticModule } from "./statistic/statistic.module";
 import { MongooseModule } from "@nestjs/mongoose";
 import { KnexModule } from "nest-knexjs";
+import { AnalyticsModule } from "./analytics/analytics.module";
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { KnexModule } from "nest-knexjs";
         },
       },
     }),
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
